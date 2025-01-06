@@ -1,5 +1,5 @@
 import time
-from telefon_sentral import Sentral
+from sentral import Sentral
 
 s = Sentral()
 
