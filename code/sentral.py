@@ -1,11 +1,13 @@
-from machine import Pin, PWM
+from machine import Pin, PWM, Timer
 import time
 
 class Sentral:
     def __init__(self, SHK_PIN_NO=23, RM_PIN_NO=22, FR_PIN_NO=21) -> None:
 
+        self.hook_count = 0
         self.shk_pin = Pin(SHK_PIN_NO, Pin.IN)
-        self.shk_pin.irq(trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING, handler=lambda p: self.irq_hook(SHK_PIN_NO))
+#        self.shk_pin.irq(trigger=Pin.IRQ_FALLING, handler=lambda p: self.irq_hook(SHK_PIN_NO))
+        self.shk_pin.irq(trigger=Pin.IRQ_FALLING, handler=lambda p: self.irq_hook_tmp(SHK_PIN_NO))
         self.btn_pin = Pin(0, Pin.IN)
         self.btn_pin.irq(trigger=Pin.IRQ_FALLING, handler=lambda p: self.irq_btn(0))
 
@@ -16,26 +18,19 @@ class Sentral:
         self.button_was_pressed = False
 
         self.last_tick = 0
+        self.hooks = [] * 10
 
-        self.hooks = []
+#        self.tim = Timer(-1)
+#        self.tim.init(mode=Timer.PERIODIC, period=2000, callback=lambda t: self.reset_hook_count())
 
     def irq_hook(self, pin):
-        if self.shk_value != self.shk_pin.value():
-            current_tick = time.ticks_ms()
-            diff = current_tick - self.last_tick if self.last_tick else 0
-            self.last_tick = current_tick
-            item = {diff: "Off" if self.shk_value else "On"}
-            self.hooks.append(item)
-            self.shk_value = self.shk_pin.value()
+        pass
 
     def irq_btn(self, pin):
         self.button_was_pressed = True
 
     def set_ring_mode(self, mode):
-        if mode:
-            self.rm_pin.on()
-        else:
-            self.rm_pin.off()
+        self.rm_pin.value(mode)
 
     def hook_is_off(self):
         return True if self.shk_value else False
